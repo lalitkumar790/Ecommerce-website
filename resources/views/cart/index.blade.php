@@ -1,0 +1,15 @@
+@extends('layouts.store')
+@section('title', 'Your bag')
+@section('content')
+<section class="mx-auto max-w-5xl px-5 py-12 md:py-20"><p class="text-xs font-semibold uppercase tracking-[.2em] text-amber-800">Your selection</p><h1 class="mt-3 text-4xl font-semibold tracking-tight">Shopping bag</h1>
+@if ($items->isEmpty())
+    <div class="mt-10 rounded-2xl border border-stone-200 bg-white px-6 py-16 text-center"><p class="text-lg font-medium">Your bag is waiting.</p><p class="mt-2 text-sm text-stone-500">Find something useful for your everyday.</p><a href="{{ route('store.index') }}" class="mt-6 inline-block rounded-full bg-stone-900 px-6 py-3 text-sm font-semibold text-white">Explore collection</a></div>
+@else
+<div class="mt-10 grid gap-10 md:grid-cols-[1fr_300px]"><div class="divide-y divide-stone-200 border-y border-stone-200">
+@foreach ($items as $id => $item)
+<div class="flex gap-4 py-6"><div class="flex h-24 w-20 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-stone-200 to-amber-100 text-3xl font-serif text-stone-400">{{ mb_substr($item['product']->name, 0, 1) }}</div><div class="min-w-0 flex-1"><a href="{{ route('store.show', $item['product']) }}" class="font-medium">{{ $item['product']->name }}</a><p class="mt-1 text-xs text-stone-500">{{ $item['product']->category }}</p><p class="mt-2 text-sm font-semibold">₹{{ number_format((float) $item['product']->price, 2) }}</p><div class="mt-3 flex items-center gap-4"><form method="POST" action="{{ route('cart.update', $item['product']) }}" class="flex items-center gap-2">@csrf @method('PATCH')<label class="sr-only" for="qty-{{ $id }}">Quantity</label><input id="qty-{{ $id }}" name="quantity" type="number" min="1" max="{{ min(10, $item['product']->stock) }}" value="{{ $item['quantity'] }}" class="w-16 rounded-full border border-stone-300 px-3 py-1.5 text-sm"><button class="text-xs font-semibold underline">Update</button></form><form method="POST" action="{{ route('cart.remove', $item['product']) }}">@csrf @method('DELETE')<button class="text-xs text-stone-500 underline hover:text-red-700">Remove</button></form></div></div><p class="shrink-0 text-sm font-semibold">₹{{ number_format((float) $item['product']->price * $item['quantity'], 2) }}</p></div>
+@endforeach
+</div><aside class="h-fit rounded-2xl bg-white p-6 ring-1 ring-stone-200"><h2 class="font-semibold">Order summary</h2><div class="mt-5 flex justify-between text-sm text-stone-600"><span>Subtotal</span><span>₹{{ number_format($subtotal, 2) }}</span></div><div class="mt-4 flex justify-between border-t border-stone-200 pt-4 text-base font-semibold"><span>Total</span><span>₹{{ number_format($subtotal, 2) }}</span></div><p class="mt-4 text-xs leading-5 text-stone-500">Shipping and taxes are calculated in a future checkout milestone.</p><button disabled class="mt-6 w-full cursor-not-allowed rounded-full bg-stone-300 px-5 py-3 text-sm font-semibold text-stone-600">Checkout coming soon</button><a href="{{ route('store.index') }}" class="mt-4 block text-center text-xs font-semibold underline">Continue shopping</a></aside></div>
+@endif
+</section>
+@endsection
