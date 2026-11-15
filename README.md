@@ -1,32 +1,67 @@
-# Ecommerce Website
+# Form & Function — Ecommerce Website
 
-This repository is currently an **incomplete Laravel application scaffold**, not a runnable eCommerce storefront.
+A Laravel 13 storefront foundation rebuilt on a dedicated modernization branch.
 
-## Repository status
+## Current scope
 
-The default branch contains Laravel dependency manifests and project configuration, but the application directories required to run Laravel are absent. In particular, there is no `app/`, `bootstrap/`, `config/`, `routes/`, `resources/`, `database/`, `public/`, or `tests/` directory in the inspected repository tree.
+- Product catalog with basic search and pagination
+- Product detail pages
+- Session-backed cart with stock-aware quantity limits
+- Sample catalog data for local development
+- Feature tests for catalog visibility and cart behavior
 
-The tracked dependency manifests describe:
+Checkout, payments, customer accounts, administration, shipping, taxes and production deployment are not complete yet.
 
-- Laravel Framework `^9.2` and PHP `^8.0.2`
-- Laravel Jetstream, Sanctum, Tinker and Livewire
-- Laravel Mix 6, Tailwind CSS 3 and Alpine.js 3
+## Requirements
 
-These versions describe the existing scaffold; they are not a recommendation to deploy it as-is.
+- PHP 8.3+
+- Composer 2
+- Node.js 22.12+ recommended
+- SQLite for quick local setup (or a supported production database)
 
-## Recovery and modernization
+## Setup (Windows PowerShell)
 
-The `recovery/secure-baseline` branch is being used to investigate the project and establish a safe baseline without changing `master`.
+```powershell
+composer install
+Copy-Item .env.example .env
+php artisan key:generate
+New-Item -ItemType File -Force database/database.sqlite
+php artisan migrate --seed
+npm install
+npm run build
+php artisan serve
+```
 
-See [the project audit and recovery plan](docs/PROJECT_AUDIT.md) for verified findings, limitations and the proposed implementation sequence.
+Open http://127.0.0.1:8000. Run `npm run dev` in a second terminal for frontend hot reload.
+
+## Setup (macOS / Linux)
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate --seed
+npm install
+npm run build
+php artisan serve
+```
+
+## Tests and code style
+
+```bash
+php artisan test
+vendor/bin/pint --test
+composer audit
+npm audit
+```
 
 ## Security
 
-- Never commit `.env` or credentials.
-- Copy `.env.example` to `.env` only in a local development environment.
-- Configure secrets through environment variables or a secret manager.
-- If credentials were ever committed, deleting the file from the current branch is not sufficient: rotate them and consider removing them from Git history.
+Never commit `.env`, payment credentials, API keys, or customer data. Configure production secrets through your hosting platform's secret manager. Use a payment provider's hosted checkout or tokenized SDK; never store raw card data.
 
-## License
+## Project history
 
-The repository currently contains a Laravel scaffold whose original license and application ownership should be confirmed before redistribution or deployment.
+The original public repository contained Laravel dependency manifests but no application source directories. Its tracked `.env` was removed from the recovery branch, but historical commits may still contain it. Rotate any credentials that may have been present. See [the audit and recovery record](docs/PROJECT_AUDIT.md).
+
+The original `master` branch remains untouched. Development is taking place on `modernize/laravel13-storefront`.

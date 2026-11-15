@@ -1,50 +1,49 @@
-# Project audit and recovery plan
+# Project audit and recovery record
 
 Audit date: 2026-11-15
 Repository: `lalitkumar790/Ecommerce-website`
-Inspected ref: `master` and the two visible Dependabot branches.
 
-## Verified repository state
+## What the original repository contained
 
-The recursive Git tree for the original root commit, current `master`, and both visible Dependabot branches contains the same 15 root-level files:
+The original root commit, current `master`, and both visible Dependabot branches were inspected before implementation. Each contained only 15 root-level files: Laravel dependency manifests, configuration fragments, the Artisan entrypoint, and a tracked `.env`. None contained the application directories required for a complete Laravel app (`app/`, `bootstrap/`, `config/`, `routes/`, `resources/`, `database/`, `public/`, `storage/`, or `tests/`).
 
-- `.editorconfig`, `.env`, `.env.example`, `.gitattributes`, `.gitignore`, `.styleci.yml`
-- `README.md`, `artisan`, `composer.json`, `composer.lock`
-- `package.json`, `package-lock.json`, `phpunit.xml`, `tailwind.config.js`, `webpack.mix.js`
+The original Composer manifest declared PHP `^8.0.2`, Laravel `^9.2`, Jetstream, Sanctum and Livewire. The npm manifest declared Laravel Mix 6, Tailwind CSS 3 and Alpine.js 3. The latest commit on the original `master` inspected during the audit was dated 2024-09-30.
 
-No application source directories were found in any of those trees: `app/`, `bootstrap/`, `config/`, `routes/`, `resources/`, `database/`, `public/`, `storage/`, `tests/`.
+## Security finding
 
-The latest commit inspected on `master` is dated 2024-09-30. The root commit is dated 2022-05-18. The two additional branches are dependency-update branches; their trees do not restore missing application source.
-
-## Dependency manifest findings
-
-Composer declares PHP `^8.0.2`, Laravel Framework `^9.2`, Jetstream `^2.6`, Sanctum `^2.14.1`, Tinker `^2.7`, and Livewire `^2.5`.
-
-The npm manifest declares Laravel Mix 6, Tailwind CSS 3, Alpine.js 3, Axios and Lodash. The scripts compile assets with Mix.
-
-These manifests are evidence of the intended stack only. The repository cannot be treated as a complete Laravel project because essential framework bootstrap, configuration, routes and application files are absent.
-
-## Security finding and mitigation
-
-A root-level `.env` file was tracked in the public repository. Its contents were deliberately not copied into this audit or displayed.
-
-This recovery branch removes the tracked `.env` file and tightens ignore rules while retaining `.env.example`. This does **not** erase the file from previous Git commits or any existing clones/caches. Treat any credentials ever placed in that file as exposed: rotate/revoke them with their providers. If historical removal is required, plan a coordinated Git-history rewrite after credential rotation; do not force-push it as part of this baseline.
+A root-level `.env` file was tracked in the public repository. Its contents were deliberately not reproduced or displayed. The recovery branch removes the file from its current tree and tightens ignore rules. This does not erase historical commits or copies already cloned. Treat any credentials that may have appeared there as exposed and rotate them with their providers. A Git history rewrite should only be planned after rotation and with coordination for every clone/fork.
 
 ## Recovery conclusion
 
-No earlier commit or currently visible branch contains the missing application source. There is therefore no original storefront implementation available to restore from the inspected Git history.
+The inspected history and visible branches do not contain an earlier storefront to restore. Recovery from an old local clone, archive, deployment artifact, or backup remains possible, but no such artifact was present in the connected repository.
 
-The next recovery avenues are external to the currently visible Git objects: an old local clone, archive/backup, deployment artifact, or another repository. Until one is found, implementation should proceed as a new application in this branch, not as a claim that the old storefront has been recovered.
+## Modernization branch
 
-## Proposed implementation sequence
+The separate `modernize/laravel13-storefront` branch now provides a fresh Laravel 13 foundation rather than pretending to upgrade missing application code. It currently includes:
 
-1. Preserve this branch and continue to leave `master` untouched.
-2. Confirm product requirements and the intended ownership/licensing of any recovered assets.
-3. Decide whether to retain Laravel or replace it. Avoid upgrading framework dependencies before a complete app exists and compatibility can be tested.
-4. Build a minimal, testable vertical slice: catalog, product detail, cart, checkout integration in test mode, order persistence and admin authorization.
-5. Add migrations, seeders, request validation, policies, feature tests, error handling and deployment documentation.
-6. Measure performance before and after each optimization; do not publish unverified Lighthouse or load-test claims.
+- Laravel 13 / PHP 8.3+ application bootstrap and configuration, based on the official Laravel 13 application skeleton.
+- Vite and Tailwind CSS 4 asset pipeline.
+- Product model, indexed product migration, sample product seeder.
+- Catalog listing, basic search, product detail and session-backed cart.
+- Basic feature tests for active product visibility and cart stock limits.
+- A clean storefront UI with responsive product grid and cart summary.
 
-## Validation limitations
+The checkout button is deliberately disabled. There is no payment integration, order persistence, admin panel, customer authentication, shipping/tax calculation, inventory reservation, or production hardening yet.
 
-This was a remote GitHub tree and manifest audit. No local PHP/Composer/npm runtime was available in this workflow, so dependency installation, application boot, tests, vulnerability scans and performance benchmarks have not been run.
+## Why Laravel 13
+
+Laravel 9 is end-of-life. Laravel 13 is the current major release as of this audit and requires PHP 8.3 or newer. See the [official Laravel release notes](https://laravel.com/docs/13.x/releases) and [deployment requirements](https://laravel.com/docs/13.x/deployment).
+
+## Validation status
+
+The GitHub repository tree and changed files were inspected remotely. This environment did not execute PHP, Composer, Node, npm, migrations, tests, dependency audits, or browser performance measurements. The implementation must be treated as an initial code contribution pending CI and local verification, not as a verified production deployment.
+
+## Next milestones
+
+1. Run CI and fix any bootstrap, migration, Blade, or test failures.
+2. Add customer authentication and a protected administration area with policies.
+3. Add order and order-item persistence with transactional checkout.
+4. Integrate a hosted payment provider in sandbox mode; never store raw card data.
+5. Add stock reservation/adjustment, idempotency, shipping and tax rules.
+6. Add image upload/storage, search indexing, accessibility checks, SEO metadata and observability.
+7. Benchmark page speed and database queries before making performance claims.
