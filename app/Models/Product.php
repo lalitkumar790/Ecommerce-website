@@ -14,6 +14,11 @@ class Product extends Model
         'price', 'compare_at_price', 'stock', 'image_url', 'is_active',
     ];
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     protected function casts(): array
     {
         return [

@@ -30,6 +30,19 @@ class StorefrontTest extends TestCase
             ->assertDontSee('Hidden Product');
     }
 
+    public function test_product_detail_uses_the_readable_slug_url(): void
+    {
+        $product = Product::create([
+            'name' => 'Slugged Product', 'slug' => 'slugged-product', 'sku' => 'TEST-SLUG',
+            'category' => 'Home', 'description' => 'A slug test.',
+            'price' => 250, 'stock' => 2, 'is_active' => true,
+        ]);
+
+        $this->get(route('store.show', $product))
+            ->assertOk()
+            ->assertSee('Slugged Product');
+    }
+
     public function test_customer_can_add_product_to_session_cart(): void
     {
         $product = Product::create([

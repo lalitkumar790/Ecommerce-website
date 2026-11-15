@@ -10,7 +10,8 @@ class StorefrontController extends Controller
 {
     public function index(Request $request): View
     {
-        $search = trim((string) $request->query('q', ''));
+        $validated = $request->validate(['q' => ['nullable', 'string', 'max:100']]);
+        $search = trim((string) ($validated['q'] ?? ''));
 
         $products = Product::query()
             ->where('is_active', true)
